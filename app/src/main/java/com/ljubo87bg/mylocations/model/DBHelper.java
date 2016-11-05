@@ -7,12 +7,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.location.Address;
 import android.location.Geocoder;
+import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -54,8 +54,9 @@ public class DBHelper extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery("SELECT * FROM locations",null);
         if(cursor.moveToFirst()){
             do{
-                markers.put(String.valueOf(cursor.getInt(0)),new UserMarker(cursor.getString(1),
-                        cursor.getString(2),cursor.getFloat(3),cursor.getFloat(4)));
+                markers.put(String.valueOf(cursor.getInt(0)),new UserMarker(cursor.getInt(0),
+                        cursor.getString(1),cursor.getString(2),cursor.getDouble(3),
+                        cursor.getDouble(4)));
             }while (cursor.moveToNext());
         }
         cursor = db.rawQuery("SELECT * FROM pictures",null);
@@ -74,8 +75,25 @@ public class DBHelper extends SQLiteOpenHelper {
         return markerArraylist;
     }
 
-    public UserMarker getMarker (int id) {
-        return markers.get(id);
+    public UserMarker getMarker (LatLng latLng) {
+        Log.d("latitude",String.valueOf(latLng.latitude));
+        Cursor cursor = this.getReadableDatabase().rawQuery( "SELECT * FROM locations WHERE Lat=?",
+                new String[] {String.valueOf(latLng.latitude)} );
+        Log.d("cursor2",String.valueOf(cursor.moveToFirst()));
+        cursor.moveToFirst();
+        int id=0;
+        do{
+            if(cursor.getDouble(4)==latLng.longitude)
+                id=cursor.getInt(0);
+        }while(cursor.moveToNext());
+        cursor.close();
+
+        Cursor cursor2 = this.getReadableDatabase().rawQuery( "SELECT * FROM locations WHERE _id=?",
+                new String[] { String.valueOf(id) } );
+        cursor2.moveToFirst();
+        String address = cursor2.getString(1);
+        String country = cursor2.getString(2);
+        return new UserMarker(id,address,country,latLng.latitude,latLng.longitude);
     }
 
     public void editMarker (int markerID, String address, String country, float lat, float lng){
@@ -83,7 +101,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public void deleteMarker (int markerID){
-        getWritableDatabase().delete("locations","_id=?",new String[]{String.valueOf(markerID)});
+//        getWritableDatabase().delete("locations","_id=?",new String[]{String.valueOf(markerID)});
     }
 
     public void addMarker (LatLng latLng){
@@ -101,6 +119,8 @@ public class DBHelper extends SQLiteOpenHelper {
         ContentValues contentValues = new ContentValues();
         contentValues.put("Address",address);
         contentValues.put("Country",country);
+
+        Log.d("latitudeadd",String.valueOf(latLng.latitude));
         contentValues.put("Lat",latLng.latitude);
         contentValues.put("Long",latLng.longitude);
         db.insert("locations", null, contentValues);
@@ -109,6 +129,6 @@ public class DBHelper extends SQLiteOpenHelper {
         cursor.moveToFirst();
         int id=0;
         do{if(cursor.getDouble(4)==latLng.longitude) id=cursor.getInt(0);}while(cursor.moveToNext());
-        markers.put(String.valueOf(id),new UserMarker(address,country,latLng.latitude,latLng.longitude));
+        markers.put(String.valueOf(id),new UserMarker(id,address,country,latLng.latitude,latLng.longitude));
     }
 }

@@ -3,6 +3,7 @@ package com.ljubo87bg.mylocations.activities;
 import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -42,14 +43,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.addMarker(markerOptions);
         }
 
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
+                Log.d("latitude",String.valueOf(marker.getPosition().latitude));
                 startActivity(new Intent(MapsActivity.this,InfoActivity.class)
-                        .putExtra("marker_id",marker.getId()));
+                        .putExtra("lat",marker.getPosition().latitude)
+                        .putExtra("lgt",marker.getPosition().longitude));
                 return true;
             }
         });

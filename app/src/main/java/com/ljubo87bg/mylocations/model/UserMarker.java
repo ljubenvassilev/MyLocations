@@ -14,7 +14,8 @@ public class UserMarker{
     private double lng;
     private ArrayList<String> pictures;
 
-    public UserMarker(String address, String country, double lat, double lng) {
+    public UserMarker(int markerID, String address, String country, double lat, double lng) {
+        this.markerID = markerID;
         this.address = address;
         this.country = country;
         this.lat = lat;
