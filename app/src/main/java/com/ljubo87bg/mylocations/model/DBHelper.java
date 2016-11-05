@@ -101,7 +101,18 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public void deleteMarker (int markerID){
-//        getWritableDatabase().delete("locations","_id=?",new String[]{String.valueOf(markerID)});
+        SQLiteDatabase db = this.getWritableDatabase();
+        try{
+            db.delete("locations", "_id = ?", new String[] { String.valueOf(markerID) });
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            db.close();
+        }
     }
 
     public void addMarker (LatLng latLng){

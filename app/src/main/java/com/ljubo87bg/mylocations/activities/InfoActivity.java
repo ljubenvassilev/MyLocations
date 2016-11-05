@@ -1,8 +1,10 @@
 package com.ljubo87bg.mylocations.activities;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -20,7 +22,7 @@ import com.ljubo87bg.mylocations.model.UserMarker;
 public class InfoActivity extends MapsActivity implements OnMapReadyCallback {
 
     private TextView id, country, address, latitude, longitude;
-    private Button add;
+    private Button add,delete;
     private GoogleMap mMap;
     private Intent intent;
     private double latitudeValue, longitudeValue;
@@ -52,12 +54,32 @@ public class InfoActivity extends MapsActivity implements OnMapReadyCallback {
         longitude = (TextView) findViewById(R.id.longitudeTV);
         longitude.setText(String.valueOf(longitudeValue));
         add = (Button) findViewById(R.id.button_add);
+        delete = (Button) findViewById(R.id.button_delete);
+        delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... params) {
+                        db.deleteMarker(userMarker.getMarkerID());
+                        return null;
+                    }
 
+                    @Override
+                    protected void onPostExecute(Void aVoid) {
+                        super.onPostExecute(aVoid);
+                        setResult(RESULT_OK,new Intent());
+                    }
+                }.execute();
+                finish();
+            }
+        });
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
         LatLng coordinates = new LatLng(latitudeValue,longitudeValue);
         mMap.addMarker(new MarkerOptions().position(coordinates).draggable(true));
         moveToCurrentLocation(coordinates);

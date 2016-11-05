@@ -21,13 +21,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private GoogleMap mMap;
     DBHelper db=DBHelper.getInstance(this);
-
+    private SupportMapFragment mapFragment;
+    Marker clicked;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+        mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         db.init();
@@ -36,20 +37,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
         final ArrayList<UserMarker> markers = db.getMarkers();
         for(UserMarker marker:markers){
             MarkerOptions markerOptions = new MarkerOptions().position(new LatLng(marker.getLat(),
                     marker.getLng()));
-            mMap.addMarker(markerOptions);
         }
 
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-                Log.d("latitude",String.valueOf(marker.getPosition().latitude));
-                startActivity(new Intent(MapsActivity.this,InfoActivity.class)
+                clicked=marker;
+                startActivityForResult(new Intent(MapsActivity.this,InfoActivity.class)
                         .putExtra("lat",marker.getPosition().latitude)
-                        .putExtra("lgt",marker.getPosition().longitude));
+                        .putExtra("lgt",marker.getPosition().longitude),1);
+
                 return true;
             }
         });
@@ -67,5 +69,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onDestroy() {
         db.close();
         super.onDestroy();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        clicked.remove();
     }
 }
