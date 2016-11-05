@@ -42,7 +42,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("create table locations (_id INTEGER PRIMARY KEY AUTOINCREMENT, Address TEXT," +
                 "Country TEXT, Lat REAL, Long REAL)" );
-        db.execSQL("create table pictures (File TEXT PRIMARY KEY NOT NULL, " +
+        db.execSQL("create table pictures (_id INTEGER PRIMARY KEY AUTOINCREMENT, File TEXT, " +
                 "location_id INTEGER)" );
     }
 
@@ -62,7 +62,7 @@ public class DBHelper extends SQLiteOpenHelper {
         cursor = db.rawQuery("SELECT * FROM pictures",null);
         if(cursor.moveToFirst()){
             do{
-                markers.get(String.valueOf(cursor.getInt(1))).addToPictures(cursor.getString(0));
+                markers.get(String.valueOf(cursor.getInt(2))).addToPictures(cursor.getString(1));
             }while (cursor.moveToNext());
         }
         cursor.close();
@@ -76,10 +76,8 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public UserMarker getMarker (LatLng latLng) {
-        Log.d("latitude",String.valueOf(latLng.latitude));
         Cursor cursor = this.getReadableDatabase().rawQuery( "SELECT * FROM locations WHERE Lat=?",
                 new String[] {String.valueOf(latLng.latitude)} );
-        Log.d("cursor2",String.valueOf(cursor.moveToFirst()));
         cursor.moveToFirst();
         int id=0;
         do{
@@ -123,8 +121,6 @@ public class DBHelper extends SQLiteOpenHelper {
         ContentValues contentValues = new ContentValues();
         contentValues.put("Address",address);
         contentValues.put("Country",country);
-
-        Log.d("latitudeadd",String.valueOf(latLng.latitude));
         contentValues.put("Lat",latLng.latitude);
         contentValues.put("Long",latLng.longitude);
         db.insert("locations", null, contentValues);
@@ -134,5 +130,16 @@ public class DBHelper extends SQLiteOpenHelper {
         int id=0;
         do{if(cursor.getDouble(4)==latLng.longitude) id=cursor.getInt(0);}while(cursor.moveToNext());
         markers.put(String.valueOf(id),new UserMarker(id,address,country,latLng.latitude,latLng.longitude));
+    }
+
+    public void addToPictures(int markerID, String picURL) {
+        Log.d("marker",String.valueOf(markerID));
+        Log.d("url",picURL);
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("location_id",markerID);
+        contentValues.put("File",picURL);
+        db.insert("pictures", null, contentValues);
+        markers.get(String.valueOf(markerID)).addToPictures(picURL);
     }
 }

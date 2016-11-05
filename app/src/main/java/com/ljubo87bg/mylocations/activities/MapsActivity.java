@@ -75,8 +75,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(resultCode==RESULT_OK){
-            Log.d("moving","go");
+        if(resultCode==RESULT_OK&&requestCode==1){
             clicked.setPosition(new LatLng(data.getExtras().getDouble("lat"),data.getExtras().getDouble("lgt")));
         }else
         if(resultCode==RESULT_CANCELED) {

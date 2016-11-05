@@ -144,7 +144,11 @@
         android:layout_marginBottom="5dp"
         android:orientation="horizontal">
 
-
+        <android.support.v7.widget.RecyclerView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/recyclerList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
 
     </LinearLayout>
 
