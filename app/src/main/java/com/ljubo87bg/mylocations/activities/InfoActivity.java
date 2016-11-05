@@ -1,6 +1,7 @@
 package com.ljubo87bg.mylocations.activities;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -38,9 +39,6 @@ public class InfoActivity extends MapsActivity implements OnMapReadyCallback {
         intent = getIntent();
         latitudeValue=intent.getExtras().getDouble("lat");
         longitudeValue=intent.getExtras().getDouble("lgt");
-
-        Log.d("latitude",String.valueOf(latitudeValue));
-        Log.d("longitude",String.valueOf(longitudeValue));
         userMarker = DBHelper.getInstance(InfoActivity.this).getMarker(new LatLng(latitudeValue,
                 longitudeValue));
         id = (TextView) findViewById(R.id.idTV);
@@ -68,7 +66,8 @@ public class InfoActivity extends MapsActivity implements OnMapReadyCallback {
                     @Override
                     protected void onPostExecute(Void aVoid) {
                         super.onPostExecute(aVoid);
-                        setResult(RESULT_OK,new Intent());
+                        Intent data = new Intent();
+                        setResult(RESULT_CANCELED,data);
                     }
                 }.execute();
                 finish();
@@ -92,7 +91,9 @@ public class InfoActivity extends MapsActivity implements OnMapReadyCallback {
 
             @Override
             public void onMarkerDragEnd(Marker marker) {
-
+                latitudeValue = marker.getPosition().latitude;
+                longitudeValue = marker.getPosition().longitude;
+                db.editMarker(userMarker.getMarkerID(),latitudeValue,longitudeValue);
             }
         });
     }
@@ -101,5 +102,14 @@ public class InfoActivity extends MapsActivity implements OnMapReadyCallback {
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation,15));
         mMap.animateCamera(CameraUpdateFactory.zoomIn());
         mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent();
+        intent.putExtra("lat", latitudeValue);
+        intent.putExtra("lgt", longitudeValue);
+        setResult(RESULT_OK,intent);
+        super.onBackPressed();
     }
 }

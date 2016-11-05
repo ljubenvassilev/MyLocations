@@ -42,6 +42,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         for(UserMarker marker:markers){
             MarkerOptions markerOptions = new MarkerOptions().position(new LatLng(marker.getLat(),
                     marker.getLng()));
+            mMap.addMarker(markerOptions);
         }
 
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
@@ -74,6 +75,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        clicked.remove();
+        if(resultCode==RESULT_OK){
+            Log.d("moving","go");
+            clicked.setPosition(new LatLng(data.getExtras().getDouble("lat"),data.getExtras().getDouble("lgt")));
+        }else
+        if(resultCode==RESULT_CANCELED) {
+            clicked.remove();
+        }
     }
 }
